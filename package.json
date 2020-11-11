@@ -1,0 +1,57 @@
+{
+  "name": "gonoosa_picamera",
+  "version": "0.0.1",
+  "description": "Raspi-Camera realtime feed of ALPR results",
+  "private": false,
+  "main": "./src/index.ts",
+  "types": "build/js/src/index.d.ts",
+  "scripts": {
+    "prepare": "npm run build",
+    "prepublishOnly": "npm test && npm run lint",
+    "preversion": "npm run lint",
+    "postversion": "git push && git push --tags",
+    "release": "npm publish --access public",
+    "pre-commit": "npm run format && npm run lint && npm run test",
+    "version": "npm run format && git add -A src",
+    "format": "npx prettier --write .",
+    "lint": "npx prettier --check \"src/**/*.ts\" \"test/**/*.ts\"",
+    "clean": "rm -fR build && rm -fR node_modules/",
+    "build": "tsc",
+    "build-watch": "tsc --watch",
+    "test": "npm run build && jest --verbose=true --detectOpenHandles --coverageDirectory build/jest-coverage",
+    "test-watch": "watch 'npm run test' ./src/ ./test/",
+    "serve:local": "npm run build && nodemon ./build/js/src/index.js"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "gtfs-realtime-bindings": "0.0.6"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.8",
+    "@types/jest": "^26.0.15",
+    "jest": "^26.6.1",
+    "nodemon": "^2.0.6",
+    "prettier": "2.1.2",
+    "shared-git-hooks": "^1.2.1",
+    "ts-jest": "^26.4.0",
+    "typescript": "~3.9.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dbryar/picamera.git"
+  },
+  "keywords": [
+    "GTFS",
+    "translink",
+    "timetable"
+  ],
+  "authors": [
+    "Daniel Bryar",
+    "Bert van Brakel"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dbryar/gtfs-translink/issues"
+  },
+  "homepage": "https://github.com/dbryar/gtfs-translink#readme"
+}
