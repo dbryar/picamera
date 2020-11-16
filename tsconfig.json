@@ -1,7 +1,7 @@
 {
   "compileOnSave": true,
   "compilerOptions": {
-    "outDir": "build/js/src",
+    "outDir": "build/js",
     /* for compatibility see http://kangax.github.io/compat-table/es2016plus/ */
     "target": "ES6",
     "module": "commonjs",

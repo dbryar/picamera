@@ -12,7 +12,7 @@ const settings = {
   ],
   confidence: 88,
   location: 'NodeJS testing',
-  apiHost: 'https://localhost:3000',
+  apiHost: 'http://localhost:3000',
   apiName: 'parking',
   apiTarget: 'junction',
 }
@@ -34,6 +34,9 @@ const stream = forever.start(settings.call, {
   minUptime: 4000,
   spinSleepTime: 3000,
 })
+
+// set two counters
+var counter = 0
 
 stream.on('restart', () => {
   console.log(`Restart #${stream.times} for '${settings.call[0]}' stream`)
@@ -65,7 +68,7 @@ stream.on('stdout', (json: string) => {
   }
 })
 
-// every 2.5 seconds filter the current set of plates for unique-ness based on similarity
+// every 4 seconds filter the current set of plates for unique-ness based on similarity
 setInterval(() => {
   console.log(`Filtering plates...`)
   filter
@@ -78,27 +81,30 @@ setInterval(() => {
         alpr = res
       }
     })
-    .catch((err: any) => console.log(err))
-}, 2500)
-
-// every 15s upload current set of filtered plates
-setInterval(() => {
-  let url = [settings.apiHost, settings.apiName, settings.apiTarget].join('/')
-  let json = JSON.stringify(alpr)
-
-  // if the buffer has data, upload to API
-  if (alpr.length) {
-    update
-      .api(url, json)
-      .then((res: any) => {
-        console.log(`Recording plates...${res}`)
-        console.log(`${json} sent to ${url}`)
-        alpr = [] // clear ALPR data
-      })
-      .catch((err: any) => {
-        console.log(`Failed to send ${json} to ${url}:`, err)
-      })
-  } else {
-    console.log(`No data to send`)
-  }
-}, 15000)
+    .catch((err: any) => {
+      console.log(err)
+    })
+    .finally(() => {
+      counter++
+      // every 5th rotation (20s) upload current set of filtered plates
+      if (alpr.length && counter >= 5) {
+        let url = [settings.apiHost, settings.apiName, settings.apiTarget].join('/')
+        let json = { plates: alpr }
+        update
+          .api(url, json)
+          .then((res: any) => {
+            console.log(`Recording plates...${res.statusText} (code: ${res.status})`)
+            console.log(`${JSON.stringify(json)} sent to ${url}`)
+            alpr = [] // clear ALPR data
+          })
+          .catch((err: any) => {
+            console.log(`Failed to send ${json} to ${url}:\n`, err)
+          })
+          counter = 0 // reset counter
+      } else if(counter >= 5) {
+        console.log(`No data to send`)
+        counter = 0
+      }
+    })
+    console.log(`Counter: ${counter}`)
+}, 4000)

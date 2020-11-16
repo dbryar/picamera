@@ -2,7 +2,7 @@ const axios = require('axios')
 
 export async function api(url: any, data: any) {
   return new Promise((resolve, reject) => {
-    console.log(`posting to ${url}`)
+    console.log(`posting to ${url}\n`)
     axios
       .post(url, data)
       .then(function (res: any) {
